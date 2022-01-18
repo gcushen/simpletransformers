@@ -2151,6 +2151,10 @@ class ClassificationModel:
 
             eval_loss = eval_loss / nb_eval_steps
 
+            # Todo: refactor
+            # Temp disable regression as args.regression yields error as doesn't exist in our case
+            isregression = False
+
             if args.sliding_window:
                 count = 0
                 window_ranges = []
@@ -2164,7 +2168,8 @@ class ClassificationModel:
                 ]
 
                 model_outputs = preds
-                if args.regression is True:
+
+                if isregression is True:
                     preds = [np.squeeze(pred) for pred in preds]
                     final_preds = []
                     for pred_row in preds:
@@ -2182,7 +2187,7 @@ class ClassificationModel:
                         else:
                             final_preds.append(mode_pred[0])
                     preds = np.array(final_preds)
-            elif not multi_label and args.regression is True:
+            elif not multi_label and isregression is True:
                 preds = np.squeeze(preds)
                 model_outputs = preds
             else:
@@ -2205,7 +2210,7 @@ class ClassificationModel:
                 else:
                     preds = np.argmax(preds, axis=1)
 
-        if self.args.labels_map and not self.args.regression:
+        if self.args.labels_map and not isregression:
             inverse_labels_map = {
                 value: key for key, value in self.args.labels_map.items()
             }
